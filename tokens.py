@@ -49,9 +49,8 @@ class TokenType(Enum):
     EOF = auto()
 
 class Token():
-
-    def __init__(self, type : TokenType, lexeme, literal, line ):
-        self.type = type
+    def __init__(self, ttype : TokenType, lexeme, literal, line ):
+        self.type = ttype
         self.lexeme = lexeme
         self.literal = literal
         self.line = line

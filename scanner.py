@@ -1,5 +1,6 @@
 from tokens import Token, TokenType
 from gura import error
+
 class Scanner():
     tokens : list[Token] = []
     start = 0
@@ -53,7 +54,13 @@ class Scanner():
             case '!': self.addToken(TokenType.BANG_EQUAL if self.match('=') else TokenType.BANG); return
 
             case '/':
-                while self.peek() != '\n' and not self.atEnd(): self.advance() if self.match('/') else self.addToken(TokenType.SLASH)
+                if self.match('/'):
+                    while self.peek() != '\n' and not self.atEnd(): self.advance()
+                elif self.match('*'):
+                    while not self.matchStr('*/'): pass
+                else:
+                    self.addToken(TokenType.SLASH)
+
 
             #whitespace
             case ' ': return
@@ -68,15 +75,11 @@ class Scanner():
             #literals
             case '"': self.string(); return
 
-            case 'o':
-                if self.match('r'):
-                    self.addToken(TokenType.OR)
-
-
-
             case default:
                 if c.isdigit():
                     self.number()
+                elif c.isalpha():
+                    self.identifier()
                 else:
                     error(self.line, 'Unexpected character')
                 return
@@ -101,7 +104,7 @@ class Scanner():
                 self.line +=1
             self.advance()
         if self.atEnd():
-            error(self.line, "unterminated string")
+            error(self.line, "Unterminated string")
 
         val = self.source[start+1 : self.current-1]
         self.addToken(TokenType.STRING, val)
@@ -117,13 +120,17 @@ class Scanner():
             t = TokenType.IDENTIFIER
         self.addToken(t)
 
-
     def peek(self, offset=0):
         if self.atEnd(): return '\0'
         return self.source[self.current + offset]
 
     def atEnd(self):
         return len(self.source) <= self.current + 1
+
+    def matchStr(self, expected):
+        for c in expected:
+            if not self.match(c): return False
+        return True
 
     def match(self, expected):
         if self.atEnd(): return False

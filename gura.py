@@ -26,8 +26,8 @@ def runFile(filename):
             content = file.read()
         run(content)
 
-        if hadError==True:
-            exit(65)
+        if hadError:
+            sys.exit(65)
     except FileNotFoundError:
         return f"Error: The file '{filename}' was not found."
     except IOError:
@@ -36,10 +36,10 @@ def runFile(filename):
 def main(args):
     if len(args) > 2:
         print("Usage: python3 gura.py <script>")
-        return
     elif len(args) == 2:
         runFile(args[0])
     else:
+        print("Gura 0.0.0")
         runPrompt()
 
 if __name__ == "__main__":
