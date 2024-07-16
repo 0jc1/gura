@@ -1,0 +1,36 @@
+print("why hello!")
+
+fun foo(arg1) {
+
+}
+
+while() {
+
+}
+
+for ( ; ; ) {
+
+}
+
+repeat(10) {
+
+}
+
+wait(1)
+
+cmd("ls");
+
+
+if () {
+
+} else {
+
+}
+
+
+do {
+
+}
+
+
+// function, list, string, bool, int, float, char
