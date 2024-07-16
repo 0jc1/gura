@@ -10,7 +10,6 @@ def report(line: int, where: str, msg: str):
     hadError = True
 
 def run(source):
-
     pass
 
 def runPrompt():
@@ -42,9 +41,6 @@ def main(args):
         runFile(args[0])
     else:
         runPrompt()
-
-
-
 
 if __name__ == "__main__":
     main(sys.argv)
