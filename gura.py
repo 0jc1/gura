@@ -1,4 +1,5 @@
 import sys
+from scanner import Scanner
 
 hadError = False
 
@@ -10,6 +11,9 @@ def report(line: int, where: str, msg: str):
     hadError = True
 
 def run(source):
+    scanner = Scanner(source)
+    tokens = scanner.scanTokens()
+    print([vars(instance) for instance in tokens])
     pass
 
 def runPrompt():
@@ -37,7 +41,7 @@ def main(args):
     if len(args) > 2:
         print("Usage: python3 gura.py <script>")
     elif len(args) == 2:
-        runFile(args[0])
+        runFile(args[1])
     else:
         print("Gura 0.0.0")
         runPrompt()

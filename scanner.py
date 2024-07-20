@@ -1,10 +1,16 @@
 from tokens import Token, TokenType
-from gura import error
+
+def error(line: int, msg: str):
+    report(line, "", msg)
+
+def report(line: int, where: str, msg: str):
+    print(f"[{line}] error {where} : {msg}")
 
 class Scanner():
-    tokens : list[Token] = []
+    tokens = []
     start = 0
-    current = 0
+    tokenStart = 0
+    current = -1
     line = 1
     keywords = {
         "if": TokenType.IF,
@@ -27,62 +33,97 @@ class Scanner():
         self.source = source
 
     def scanTokens(self):
-        for char in self.source:
+        while not self.atEnd():
             self.start = self.current
             self.scanToken()
 
-        self.tokens.append(Token(TokenType.EOF, "", None, self.line))
+        self.tokenStart = self.current
+        self.addToken(TokenType.EOF)
         return self.tokens
 
     def scanToken(self):
         c = self.advance()
-        match c:
-            case '(': self.addToken(TokenType.LEFT_PAREN); return
-            case ')': self.addToken(TokenType.RIGHT_PAREN); return
-            case '{': self.addToken(TokenType.LEFT_BRACE); return
-            case '}': self.addToken(TokenType.RIGHT_BRACE); return
-            case ',': self.addToken(TokenType.COMMA); return
-            case '.': self.addToken(TokenType.DOT); return
-            case '-': self.addToken(TokenType.MINUS); return
-            case '+': self.addToken(TokenType.PLUS); return
-            case ';': self.addToken(TokenType.SEMICOLON); return
-            case '*': self.addToken(TokenType.STAR); return
+        self.tokenStart = self.current
+        if c == '(':
+            self.addToken(TokenType.LEFT_PAREN)
+            return
+        elif c == ')':
+            self.addToken(TokenType.RIGHT_PAREN)
+            return
+        elif c == '{':
+            self.addToken(TokenType.LEFT_BRACE)
+            return
+        elif c == '}':
+            self.addToken(TokenType.RIGHT_BRACE)
+            return
+        elif c == ',':
+            self.addToken(TokenType.COMMA)
+            return
+        elif c == '.':
+            self.addToken(TokenType.DOT)
+            return
+        elif c == '-':
+            self.addToken(TokenType.MINUS)
+            return
+        elif c == '+':
+            self.addToken(TokenType.PLUS)
+            return
+        elif c == ';':
+            self.addToken(TokenType.SEMICOLON)
+            return
+        elif c == '*':
+            self.addToken(TokenType.STAR)
+            return
 
-            case '=': self.addToken(TokenType.EQUAL_EQUAL if self.match('=') else TokenType.EQUAL); return
-            case '<': self.addToken(TokenType.LESS_EQUAL if self.match('=') else TokenType.LESS); return
-            case '>': self.addToken(TokenType.GREATER_EQUAL if self.match('=') else TokenType.GREATER); return
-            case '!': self.addToken(TokenType.BANG_EQUAL if self.match('=') else TokenType.BANG); return
+        elif c == '=':
+            self.addToken(TokenType.EQUAL_EQUAL if self.match('=') else TokenType.EQUAL)
+            return
+        elif c == '<':
+            self.addToken(TokenType.LESS_EQUAL if self.match('=') else TokenType.LESS)
+            return
+        elif c == '>':
+            self.addToken(TokenType.GREATER_EQUAL if self.match('=') else TokenType.GREATER)
+            return
+        elif c == '!':
+            self.addToken(TokenType.BANG_EQUAL if self.match('=') else TokenType.BANG)
+            return
 
-            case '/':
-                if self.match('/'):
-                    while self.peek() != '\n' and not self.atEnd(): self.advance()
-                elif self.match('*'):
-                    while not self.matchStr('*/'): pass
-                else:
-                    self.addToken(TokenType.SLASH)
+        elif c == '/':
+            if self.match('/'):
+                while self.peek() != '\n' and not self.atEnd():
+                    self.advance()
+            elif self.match('*'):
+                while not self.matchStr('*/'):
+                    pass
+            else:
+                self.addToken(TokenType.SLASH)
 
+        # whitespace
+        elif c == ' ':
+            return
+        elif c == '\r':
+            return
+        elif c == '\t':
+            return
 
-            #whitespace
-            case ' ': return
-            case '\r': return
-            case '\t': return
+        # new line
+        elif c == '\n':
+            self.line += 1
+            return
 
-            # new line
-            case '\n':
-                self.line += 1
-                return
+        # literals
+        elif c == '"':
+            self.string()
+            return
 
-            #literals
-            case '"': self.string(); return
-
-            case default:
-                if c.isdigit():
-                    self.number()
-                elif c.isalpha():
-                    self.identifier()
-                else:
-                    error(self.line, 'Unexpected character')
-                return
+        else:
+            if c.isdigit():
+                self.number()
+            elif c.isalpha():
+                self.identifier()
+            else:
+                error(self.line, 'Unexpected character ' + c)
+            return
 
     def number(self):
         start = self.current
@@ -93,7 +134,7 @@ class Scanner():
 
         while (self.peek().isdigit()): self.advance()
 
-        val = self.source[start : self.current]
+        val = self.source[start-1 : self.current]
         self.addToken(TokenType.NUMBER, float(val))
 
 
@@ -103,17 +144,18 @@ class Scanner():
             if self.peek() == '\n':
                 self.line +=1
             self.advance()
+        self.advance()
         if self.atEnd():
             error(self.line, "Unterminated string")
 
-        val = self.source[start+1 : self.current-1]
+        val = self.source[start : self.current]
         self.addToken(TokenType.STRING, val)
 
     def identifier(self):
         start = self.current
         while self.peek().isalnum(): self.advance()
 
-        text = self.source[start:self.current]
+        text = self.source[start-1 : self.current]
         t = self.keywords.get(text)
 
         if t==None:
@@ -135,15 +177,15 @@ class Scanner():
     def match(self, expected):
         if self.atEnd(): return False
         if self.source[self.current] != expected: return False
-        current += 1
+        self.current += 1
         return True
 
     def advance(self):
-        c = self.source[current]
-        current += 1
+        c = self.source[self.current]
+        self.current += 1
         return c
 
     def addToken(self, token, literal=None):
-        self.tokens.append(Token(token, literal, self.line))
+        self.tokens.append(Token(token, self.source[self.tokenStart -1 : self.current], literal, self.line))
 
 
