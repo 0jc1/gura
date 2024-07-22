@@ -1,3 +1,4 @@
+/*
 print("why hello!")
 
 fun foo(arg1) {
@@ -33,4 +34,6 @@ do {
 }
 
 
-// function, list, string, bool, int, float, char
+
+
+*/

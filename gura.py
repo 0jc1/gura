@@ -5,6 +5,7 @@ hadError = False
 
 def error(line: int, msg: str):
     report(line, "", msg)
+    sys.exit(65)
 
 def report(line: int, where: str, msg: str):
     print(f"[{line}] error {where} : {msg}")

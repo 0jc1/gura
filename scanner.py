@@ -89,12 +89,12 @@ class Scanner():
             return
 
         elif c == '/':
-            if self.match('/'):
+            if self.peek(1) == '/':
                 while self.peek() != '\n' and not self.atEnd():
                     self.advance()
-            elif self.match('*'):
-                while not self.matchStr('*/'):
-                    pass
+            elif self.peek(1) == '*':
+                while not self.matchStr('*/') and not self.atEnd():
+                    self.advance()
             else:
                 self.addToken(TokenType.SLASH)
 
@@ -135,7 +135,10 @@ class Scanner():
         while (self.peek().isdigit()): self.advance()
 
         val = self.source[start-1 : self.current]
-        self.addToken(TokenType.NUMBER, float(val))
+        if '.' in val:
+            self.addToken(TokenType.NUMBER, float(val))
+        else:
+            self.addToken(TokenType.NUMBER, int(val))
 
 
     def string(self):
@@ -144,18 +147,18 @@ class Scanner():
             if self.peek() == '\n':
                 self.line +=1
             self.advance()
-        self.advance()
         if self.atEnd():
             error(self.line, "Unterminated string")
 
         val = self.source[start : self.current]
+        self.advance()
         self.addToken(TokenType.STRING, val)
 
     def identifier(self):
         start = self.current
         while self.peek().isalnum(): self.advance()
 
-        text = self.source[start-1 : self.current]
+        text = self.source[start : self.current]
         t = self.keywords.get(text)
 
         if t==None:
