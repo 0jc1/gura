@@ -4,8 +4,7 @@ from tokens import Token
 # base classes
 class Expr:
     def accept():
-        # raise NotImplementedError("Subclasses must implement this method")
-        pass
+        raise NotImplementedError("Subclasses must implement this method")
 
 class Visitor:
     def visit():
