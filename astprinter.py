@@ -15,11 +15,12 @@ class AstPrinter(Visitor):
         return str(expr.value)
 
     def visitUnary(self, expr):
-        return self.parenthesize(expr.operator.lexeme, expr.left, expr.right)
+        return self.parenthesize(expr.operator.lexeme, expr.right)
 
     def parenthesize(self, name, *args):
         result = "(" + name
-        for arg in args:
-            result = result + " " + arg
+        for expr in args:
+            result = result + " "
+            result = result + expr.accept(self)
         result = result + ")"
         return result
