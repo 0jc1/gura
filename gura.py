@@ -1,11 +1,13 @@
 import sys
+from tokens import *
 from scanner import Scanner
+from expr import *
+from astprinter import AstPrinter
 
 hadError = False
 
 def error(line: int, msg: str):
     report(line, "", msg)
-    sys.exit(65)
 
 def report(line: int, where: str, msg: str):
     print(f"[{line}] error {where} : {msg}")
@@ -14,7 +16,7 @@ def report(line: int, where: str, msg: str):
 def run(source):
     scanner = Scanner(source)
     tokens = scanner.scanTokens()
-    print([vars(instance) for instance in tokens])
+    # print([vars(instance) for instance in tokens])
     pass
 
 def runPrompt():
@@ -39,13 +41,24 @@ def runFile(filename):
         return f"Error: An error occurred while reading the file '{filename}'."
 
 def main(args):
-    if len(args) > 2:
-        print("Usage: python3 gura.py <script>")
-    elif len(args) == 2:
-        runFile(args[1])
-    else:
-        print("Gura 0.0.0")
-        runPrompt()
+
+    expression = Binary(
+        Unary(
+            Token(TokenType.MINUS, "-", None, 1),
+            Literal(111)),
+        Token(TokenType.STAR, "*", None, 1),
+        Grouping(Literal(45.3))
+                )
+
+    print(AstPrinter().print(expression))
+
+    # if len(args) > 2:
+    #     print("Usage: python3 gura.py <script>")
+    # elif len(args) == 2:
+    #     runFile(args[1])
+    # else:
+    #     print("Gura 0.0.0")
+    #     runPrompt()
 
 if __name__ == "__main__":
     main(sys.argv)
