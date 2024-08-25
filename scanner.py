@@ -1,16 +1,12 @@
 from tokens import Token, TokenType
-
-def error(line: int, msg: str):
-    report(line, "", msg)
-
-def report(line: int, where: str, msg: str):
-    print(f"[{line}] error {where} : {msg}")
+from logger import *
 
 class Scanner():
     tokens = []
     start = 0
+    source = ""
     tokenStart = 0
-    current = -1
+    current = 0
     line = 1
     keywords = {
         "if": TokenType.IF,
@@ -143,22 +139,22 @@ class Scanner():
 
     def string(self):
         start = self.current
-        while (self.peek() != '"' and not self.atEnd()):
+        while self.peek() != '"' and not self.atEnd():
             if self.peek() == '\n':
-                self.line +=1
+                self.line += 1
             self.advance()
         if self.atEnd():
             error(self.line, "Unterminated string")
 
-        val = self.source[start : self.current]
+        literal = self.source[start : self.current]
         self.advance()
-        self.addToken(TokenType.STRING, val)
+        self.addToken(TokenType.STRING, literal)
 
     def identifier(self):
         start = self.current
         while self.peek().isalnum(): self.advance()
 
-        text = self.source[start : self.current]
+        text = self.source[start-1 : self.current]
         t = self.keywords.get(text)
 
         if t==None:
@@ -170,7 +166,7 @@ class Scanner():
         return self.source[self.current + offset]
 
     def atEnd(self):
-        return len(self.source) <= self.current + 1
+        return len(self.source) <= self.current
 
     def matchStr(self, expected):
         for c in expected:
@@ -189,6 +185,8 @@ class Scanner():
         return c
 
     def addToken(self, token, literal=None):
-        self.tokens.append(Token(token, self.source[self.tokenStart -1 : self.current], literal, self.line))
+        lexeme = self.source[self.tokenStart-1 : self.current]
+        self.tokens.append(Token(token, lexeme, literal, self.line))
+        # print(f"token added {token} {lexeme} {literal}")
 
 

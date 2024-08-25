@@ -1,15 +1,16 @@
-import abc
+from abc import ABC, abstractmethod
+
 from tokens import Token
 
 # base classes
 class Expr:
+    @abstractmethod
     def accept():
         raise NotImplementedError("Subclasses must implement this method")
 
 class Visitor:
     def visit():
         pass
-
 
 # AST classes
 class Binary(Expr):

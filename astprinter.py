@@ -2,6 +2,8 @@ from expr import Expr, Visitor
 
 class AstPrinter(Visitor):
     def print(self, expr):
+        if expr is None:
+            return
         return expr.accept(self)
 
     def visitBinary(self, expr):
